@@ -14,4 +14,6 @@ public interface PlayerEvents {
     public void onWinnerReceived(Request request);
 
     public void onSuccessfulHandshake(Request request);
+
+    public void onPlayerReady(Request request);
 }

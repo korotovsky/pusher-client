@@ -2,9 +2,13 @@ package com.korotovsky.client.gui;
 
 import com.korotovsky.client.gui.events.WindowMonitor;
 import com.korotovsky.client.gui.renderer.PlayerCellRenderer;
-import com.korotovsky.client.model.Player;
+import com.korotovsky.client.core.Player;
+import com.korotovsky.client.model.PlayerModel;
+import com.korotovsky.client.network.protocol.responses.HandshakeResponse;
+import com.korotovsky.client.network.protocol.responses.ReadyResponse;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -12,12 +16,14 @@ import java.util.logging.Logger;
 
 public class MainWindow extends JFrame implements ActionListener {
     private Logger logger;
+    private Player player;
     private HashMap<String, JComponent> components;
 
-    public MainWindow(Logger logger) {
+    public MainWindow(Player player, Logger logger) {
         super("Pusher GUI");
 
         this.components = new HashMap<String, JComponent>();
+        this.player = player;
         this.logger = logger;
 
         setLookAndFeel();
@@ -40,32 +46,21 @@ public class MainWindow extends JFrame implements ActionListener {
 
         JPanel content = (JPanel)getContentPane();
 
-        content.setLayout(new BoxLayout(content, BoxLayout.LINE_AXIS));
-        /**
-         * Menu bar
-         */
+        content.setLayout(new BoxLayout(content, BoxLayout.PAGE_AXIS));
         setJMenuBar(buildMenuBar());
-
-        /**
-         * Auth status
-         */
-        JTextField textField = new JTextField("Not auth");
-        textField.setEditable(false);
-
-        content.add(textField);
-        components.put("authTextField", textField);
+        setAuthWidgets();
 
         /**
          * Right list
          */
-        Player player1 = new Player();
-        player1.setName("1234");
-        Player player2 = new Player();
-        player2.setName("foobar");
+        PlayerModel playerModel1 = new PlayerModel();
+        playerModel1.setName("1234");
+        PlayerModel playerModel2 = new PlayerModel();
+        playerModel2.setName("foobar");
 
-        DefaultListModel<Player> listModel = new DefaultListModel<Player>();
-        listModel.addElement(player1);
-        listModel.addElement(player2);
+        DefaultListModel<PlayerModel> listModel = new DefaultListModel<PlayerModel>();
+        listModel.addElement(playerModel1);
+        listModel.addElement(playerModel2);
 
         JList playerJList = new JList(listModel);
         playerJList.setFixedCellWidth(100);
@@ -103,5 +98,66 @@ public class MainWindow extends JFrame implements ActionListener {
         menuBar.add(menu);
 
         return menuBar;
+    }
+
+    private void setAuthWidgets() {
+        JPanel content = (JPanel)getContentPane();
+
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        JPanel panel1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel panel2 = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+        JTextField textField1 = new JTextField();
+        textField1.setColumns(10);
+        panel1.add(textField1);
+        components.put("userName", textField1);
+
+        JButton button1 = new JButton("Set name");
+        components.put("button1", button1);
+
+        button1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                final JTextField textField = (JTextField)components.get("userName");
+                player.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            new HandshakeResponse(player.getWriter()).setName(textField.getText()).send();
+                        } catch (Throwable e) {
+                            logger.warning(e.getMessage());
+                        }
+                    }
+                });
+            }
+        });
+        panel1.add(button1);
+
+        JButton button2 = new JButton("Set ready");
+        button2.setEnabled(false);
+        components.put("button2", button2);
+
+        button2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                player.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            new ReadyResponse(player.getWriter()).send();
+                        } catch (Throwable e) {
+                            logger.warning(e.getMessage());
+                        }
+                    }
+                });
+            }
+        });
+        panel1.add(button1);
+        panel2.add(button2);
+
+        panel.add(panel1);
+        panel.add(panel2);
+
+        content.add(panel);
     }
 }

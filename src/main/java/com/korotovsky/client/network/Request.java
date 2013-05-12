@@ -8,6 +8,7 @@ public class Request {
     private static String IS_MESSAGE = "message";
     private static String STATUS_OK = "ok";
     private static String SUCCESS_HANDSHAKE_SIGNAL = "Successful handshake";
+    private static String PLAYER_READY_SIGNAL = "Ready";
 
     private String line;
     private String[] parts;
@@ -30,6 +31,8 @@ public class Request {
 
         if (isMessageOK(SUCCESS_HANDSHAKE_SIGNAL)) {
             player.onSuccessfulHandshake(this);
+        } else if (isMessageOK(PLAYER_READY_SIGNAL)) {
+            player.onPlayerReady(this);
         }
     }
 

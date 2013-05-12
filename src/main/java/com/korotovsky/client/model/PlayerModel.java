@@ -1,6 +1,6 @@
 package com.korotovsky.client.model;
 
-public class Player {
+public class PlayerModel {
     private Integer version;
     private String name;
 
