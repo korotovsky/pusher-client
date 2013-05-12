@@ -1,20 +1,31 @@
 package com.korotovsky.client;
 
-import com.korotovsky.client.gui.MainWindow;
+import com.korotovsky.client.core.Player;
 
+import javax.swing.*;
 import java.io.*;
-import java.net.*;
 import java.util.logging.Logger;
 
 /**
  *
  */
 public class Main {
-    public static void main(String[] args) throws IOException {
-        MainWindow window = new MainWindow(Logger.getLogger("Pusher-GUI"));
+    public static void main(final String[] args) {
+        final Logger logger = Logger.getLogger("Pusher-GUI");
 
-        window.setVisible(true);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    new Player(logger, args);
+                } catch (IOException e) {
+                    logger.warning(e.getMessage());
+                }
+            }
+        });
 
+    }
+
+    public void run() {
         /*System.out.println("Welcome to Client side");
 
         Socket fromserver = null;
@@ -50,5 +61,7 @@ public class Main {
         inu.close();
         fromserver.close();*/
     }
+
+
 }
 

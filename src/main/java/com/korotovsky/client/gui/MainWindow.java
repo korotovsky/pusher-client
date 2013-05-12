@@ -7,20 +7,27 @@ import com.korotovsky.client.model.Player;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 public class MainWindow extends JFrame implements ActionListener {
     private Logger logger;
+    private HashMap<String, JComponent> components;
 
     public MainWindow(Logger logger) {
         super("Pusher GUI");
 
+        this.components = new HashMap<String, JComponent>();
         this.logger = logger;
 
         setLookAndFeel();
         addWindowListener(new WindowMonitor());
 
         init();
+    }
+
+    public HashMap<String, JComponent> getRegisteredComponents() {
+        return components;
     }
 
     @Override
@@ -38,6 +45,15 @@ public class MainWindow extends JFrame implements ActionListener {
          * Menu bar
          */
         setJMenuBar(buildMenuBar());
+
+        /**
+         * Auth status
+         */
+        JTextField textField = new JTextField("Not auth");
+        textField.setEditable(false);
+
+        content.add(textField);
+        components.put("authTextField", textField);
 
         /**
          * Right list
